@@ -14,23 +14,19 @@ fn fibonacci(n: &u128) -> u128 {
         Ordering::Greater => {
             let fibonacci_map = FIBONACCI_MAP
                 .lock()
-                .expect("Locking thread paniced when reading value!");
+                .expect("Locked thread paniced when reading value!");
 
             match fibonacci_map.get(n) {
                 Some(result) => result.clone(),
                 None => {
                     drop(fibonacci_map);
+                    let result = fibonacci(&n.sub(1)) + fibonacci(&n.sub(2));
 
-                    let result1 = fibonacci(&n.sub(1));
-                    let result2 = fibonacci(&n.sub(2));
-
-                    let final_result = result1 + result2;
                     let mut fibonacci_map = FIBONACCI_MAP
                         .lock()
-                        .expect("Locking thread paniced when setting value!");
-                    fibonacci_map.insert(n.clone(), final_result.clone());
-
-                    final_result
+                        .expect("Locked thread paniced when setting value!");
+                    fibonacci_map.insert(n.clone(), result.clone());
+                    result
                 }
             }
         }
